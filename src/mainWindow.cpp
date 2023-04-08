@@ -9,6 +9,7 @@ exitButton("exit.png",&exitTransform,&cam,&exitHover),
 failedText("failed.png",&failedTransform,&cam,&failedColor),
 continueButton("continue.png",&continueTransform,&cam,&continueColor),
 playButton("play.png",&playTransform,&cam,&playColor),
+exitButton3D("exit.png",&exit3DTransform,&cam,&exitHover),
 mainSprite("mainscreen.png",&mainTransform,&cam,&mainscreenColor)
 {
     glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int w, int h){
@@ -19,6 +20,7 @@ mainSprite("mainscreen.png",&mainTransform,&cam,&mainscreenColor)
     fadeVAO.bindVertexBuffer(fadeMesh, 4, GL_STATIC_DRAW);
     fadeVAO.bindIndexBuffer(fadeInds, 6, GL_STATIC_DRAW);
     fadeVAO.addAttribute<glm::vec2>(0, 2, GL_FLOAT, 0);
+    cam.move(glm::vec3(-16/2.0f, 30.0f, 26.0f),glm::vec3(0.0f, -0.8f, -1.0f));
 }
 
 void MainWindow::resize(GLFWwindow* window, int w, int h){
@@ -47,16 +49,13 @@ void MainWindow::update(){
     
     restartTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f * ((float)h/(float)w),0.4f, 1.0f));
     restartTransform = glm::translate(restartTransform, glm::vec3(0.0f, 0.0f, 0.0f));
-    
-
-    failedTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.6f * ((float)h/(float)w),0.6f, 1.0f));
-    failedTransform = glm::translate(failedTransform, glm::vec3(0.0f, 0.6f, 0.0f));
 
     continueTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f * ((float)h/(float)w),0.4f, 1.0f));
     continueTransform = glm::translate(continueTransform, glm::vec3(-0.05f, -0.2f, 0.0f));
 
-    playTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f * ((float)h/(float)w),0.4f, 1.0f));
-    playTransform = glm::translate(playTransform, glm::vec3(0.0f, 0.4f, 0.0f));
+    playTransform = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(-8.5f, 0.4f, -12.0f)), glm::vec3(1.4f ,1.6f, 1.0f) * 5.0f);
+
+    exit3DTransform = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(-8.5f, 0.4f, -7.0f)), glm::vec3(1.4f ,1.6f, 1.0f) * 5.0f);
 
     mainTransform = glm::scale(glm::mat4(1.0f), glm::vec3(2.0f * ((float)h/(float)w),2.0f, 1.0f));
 
@@ -65,14 +64,17 @@ void MainWindow::update(){
     double mouseX, mouseY;
     glfwGetCursorPos(window, &mouseX, &mouseY);
 
+    static long long time;
+
     if(!loading){
         if(!levelComplete){
+            time = getGlobal();
             exitTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f * ((float)h/(float)w),0.4f, 1.0f));
             exitTransform = glm::translate(exitTransform, glm::vec3(0.0f, -0.4f, 0.0f));
-            if(!hasLetters || paused){
-                fade += (0.8f - fade) * 2.0f * delta_time;
+            if(paused){
+                fade += (0.8f - fade) * 4.0f * delta_time;
             } else {
-                fade += (0.0f - fade) * 2.0f * delta_time;
+                fade += (0.0f - fade) * 4.0f * delta_time;
             }
 
             if(lastKeyPressed == VK_ESCAPE && hasLetters && globalTime - lastPressed >= 150){
@@ -83,30 +85,45 @@ void MainWindow::update(){
             if(!paused && hasLetters && !mainscreen){
                 levelManager.update();
             } else {
-                if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.35f * h && mouseY < 0.45f * h){
-                    resumeHover = 1.0f;
-                    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
-                        paused = false;
+                if(hasLetters){
+                    restartTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f * ((float)h/(float)w),0.4f, 1.0f));
+                    restartTransform = glm::translate(restartTransform, glm::vec3(0.0f, 0.0f, 0.0f));
+                    if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.35f * h && mouseY < 0.45f * h){
+                        resumeHover = 1.0f;
+                        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
+                            paused = false;
+                        }
+                    } else {
+                        resumeHover = 0.7f;
+                    }
+                    if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.45f * h && mouseY < 0.55f * h){
+                        restartHover = 1.0f;
+                        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !mainscreen){
+                            levelManager.restart();
+                            paused = false;
+                        }
+                    } else {
+                        restartHover = 0.7f;
+                    }
+                    if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.55f * h && mouseY < 0.65f * h){
+                        exitHover = 1.0f;
+                        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
+                            glfwTerminate();
+                        }
+                    } else {
+                        exitHover = 0.7f;
                     }
                 } else {
-                    resumeHover = 0.7f;
-                }
-                if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.45f * h && mouseY < 0.55f * h){
-                    restartHover = 1.0f;
-                    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
-                        levelManager.restart();
-                        paused = false;
+                    levelManager.update();
+                    if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.85f * h && mouseY < 0.95f * h){
+                        restartHover = 1.0f;
+                        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !mainscreen){
+                            levelManager.restart();
+                            paused = false;
+                        }
+                    } else {
+                        restartHover = 0.7f;
                     }
-                } else {
-                    restartHover = 0.7f;
-                }
-                if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.55f * h && mouseY < 0.65f * h){
-                    exitHover = 1.0f;
-                    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
-                        glfwTerminate();
-                    }
-                } else {
-                    exitHover = 0.7f;
                 }
             }
         } else {
@@ -115,7 +132,7 @@ void MainWindow::update(){
             fade += (1.0f - fade) * 4.0f * delta_time;
             if(mouseX > 0.35f * w && mouseX < 0.65f * w && mouseY > 0.4f * h && mouseY < 0.6f * h){
                 continueColor = 1.0f;
-                if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
+                if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS || (getGlobal() - time >= 200 && glfwGetKey(window, VK_SPACE) == GLFW_PRESS)){
                     levelComplete = false;
                     loading = true;
                     hasLetters = true;
@@ -147,7 +164,7 @@ void MainWindow::update(){
     if(mainscreen){
         exitTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.3f * ((float)h/(float)w),0.3f, 1.0f));
         exitTransform = glm::translate(exitTransform, glm::vec3(0.0f, 0.0f, 0.0f));
-        if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.35f * h && mouseY < 0.45f * h){
+        if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.4f * h && mouseY < 0.55f * h){
             playColor = 1.0f;
             if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
                 loading = true;
@@ -155,7 +172,7 @@ void MainWindow::update(){
         } else {
             playColor = 0.7f;
         }
-        if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.45f * h && mouseY < 0.55f * h){
+        if(mouseX > 0.4f * w && mouseX < 0.6f * w && mouseY > 0.55f * h && mouseY < 0.7f * h){
             exitHover = 1.0f;
             if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
                 glfwTerminate();
@@ -168,6 +185,7 @@ void MainWindow::update(){
     draw();
 
     Window::update();
+    update_time();
 }
 
 void MainWindow::newLevel(){
@@ -181,6 +199,16 @@ void MainWindow::newLevel(){
         case 2:
             levelManager.loadLevel<levels::l3>();
             break;
+        case 3:
+            levelManager.loadLevel<levels::l4>();
+            break;
+        case 4:
+            levelManager.loadLevel<levels::l5>();
+            break;
+        case 5:
+            levelManager.loadLevel<levels::l6>();
+            levelNum = -1;
+            break;
     }
     levelNum++;
 }
@@ -191,11 +219,12 @@ void MainWindow::draw(){
     
     //------------Opaque--------------
     if(mainscreen){
-        glDisable(GL_DEPTH_TEST);
-        mainSprite.draw();
-        playButton.draw();
-        exitButton.draw();
-        glEnable(GL_DEPTH_TEST);
+        mainShader->bind();
+        mainModel.render();
+        tableShader->bind();
+        table.render();
+        pencil.render();
+        stapler.render();
     } else {
         levelManager.drawOpaque();
     }
@@ -209,6 +238,9 @@ void MainWindow::draw(){
 
     if(!mainscreen){
         levelManager.drawTransparent();
+    } else {
+        playButton.draw();
+        exitButton3D.draw();
     }
 
     fadeShader_->bind();
@@ -216,15 +248,15 @@ void MainWindow::draw(){
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
     if(!loading){
         if(!levelComplete){
+            if(!hasLetters){
+                restartTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f * ((float)h/(float)w),0.4f, 1.0f));
+                restartTransform = glm::translate(restartTransform, glm::vec3(0.0f, -2.1f, 0.0f));
+            }
             if(paused || !hasLetters){
                 restartButton.draw();
-                exitButton.draw();
             }
             if(paused && hasLetters){
                 resumeButton.draw();
-            }
-            if(!hasLetters){
-                failedText.draw();
             }
         } else {
             continueButton.draw();

@@ -58,11 +58,25 @@ private:
 
     float playColor;
     glm::mat4 playTransform = glm::mat4(1.0f);
-    Sprite playButton;
+    Sprite3D playButton;
+
+    glm::mat4 exit3DTransform = glm::mat4(1.0f);
+    Sprite3D exitButton3D;
 
     float mainscreenColor = 1.0f;
     glm::mat4 mainTransform = glm::mat4(1.0f);
     Sprite mainSprite;
+    glm::mat4 pencilTransform = glm::rotate(glm::scale(glm::translate(glm::mat4(1.0f),glm::vec3(-16.0f,0.05f,-20.0f)), glm::vec3(8.0f, 8.0f, 8.0f)), glm::radians(30.0f), UP_VECTOR);
+    glm::mat4 staplerTransform = glm::rotate(glm::scale(glm::translate(glm::mat4(1.0f),glm::vec3(6.0f,4.0f,-22.0f)), glm::vec3(4.0f, 4.0f, 4.0f)), glm::radians(-60.0f), UP_VECTOR);
+    glm::mat4 tableTransform = glm::rotate(glm::scale(glm::translate(glm::mat4(1.0f),glm::vec3(-7.5f,0.0f,-11.0f)), glm::vec3(2.0f, 2.0f, 2.0f)), glm::radians(90.0f), UP_VECTOR);
+    Shader_* tableShader = new Shader(shaders::textured, uniforms(&cam.matrix, &tableTransform, assets.getTexture("table.png")),staticUniforms());
+    Model table = Model(&models::table);
+    Object pencil = Object(new Shader(shaders::textured, uniforms(&cam.matrix, &pencilTransform, assets.getTexture("pencil.png")),staticUniforms()), Model(&models::pencil));
+    Object stapler = Object(new Shader(shaders::textured, uniforms(&cam.matrix, &staplerTransform, assets.getTexture("stapler.png")),staticUniforms()), Model(&models::stapler));
+
+    Model mainModel = Model(&models::l1);
+	Shader_* mainShader = new Shader(shaders::textured, uniforms(&cam.matrix,&tableTransform,assets.getTexture("main.png")), staticUniforms());
+
 
     int levelNum = 0;
 

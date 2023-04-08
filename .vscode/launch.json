@@ -18,7 +18,7 @@
             "program": "${workspaceFolder}/App.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "C:\\Users\\james\\OneDrive\\Documents\\Java Programs\\C++\\App3",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

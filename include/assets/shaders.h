@@ -83,7 +83,7 @@ class ShaderBase : ShaderBase_{
         void setUniform(GLuint loc, glm::vec2 u) {glUniform2fv(loc, 1, glm::value_ptr(u));}
         void setUniform(GLuint loc, glm::vec3 u) {glUniform3fv(loc, 1, glm::value_ptr(u));}
         void setUniform(GLuint loc, glm::mat4 u) {glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(u));}
-        void setUniform(GLuint loc, Texture u) {glBindTexture(GL_TEXTURE_2D, u.id);}
+        void setUniform(GLuint loc, Texture u) {glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, u.id);}
 
         std::vector<const char*> uniformNames;
         std::vector<const char*> staticUniformNames;

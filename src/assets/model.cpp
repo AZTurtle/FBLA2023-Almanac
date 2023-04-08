@@ -322,7 +322,7 @@ void Model_def_T::loadModel(){
 				}
 				std::stringstream line_s;
 				line_s << line;
-				for (unsigned int i = 0; i < 9; i++) {
+				for (unsigned int i = 0; i < 6; i++) {
 					int x;
 					line_s >> x;
 					order.push_back(x);
@@ -346,14 +346,18 @@ void Model_def_T::loadModel(){
     std::vector<unsigned int> indData;
 	for (unsigned int i = 0; i < order.size() / 2; i++) {
 		unsigned int at = i * 2;
-		for(int x = 0; x < indData.size(); x++){
-			if(vertData[x].pos == verts[order[at] - 1 && vertData[x].uv == texs[order[at + 1] - 1]]){
+		bool found = false;
+		for(int x = 0; x < vertData.size(); x++){
+			if(vertData[x].pos == verts[order[at] - 1] && vertData[x].uv == texs[order[at + 1] - 1]){
 				indData.push_back(x);
-				continue;
+				found = true;
+				break;
 			}
 		}
-		vertData.push_back(Vert_T{verts[order[at] - 1], texs[order[at + 1] - 1] });
-		indData.push_back(vertData.size());
+		if(!found){
+			vertData.push_back(Vert_T{verts[order[at] - 1], texs[order[at + 1] - 1]});
+			indData.push_back(vertData.size() - 1);
+		}
 	}
 
     glGenBuffers(1, &VBO);
@@ -377,7 +381,7 @@ Model::Model(Model_* model){
 	indNum = model->indNum;
 }
 
-void Model::render(){
+void Model::render() const {
     glBindVertexArray(id);
 	glDrawElements(GL_TRIANGLES, indNum, GL_UNSIGNED_INT, 0);
 }

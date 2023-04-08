@@ -83,7 +83,7 @@ class Model{
     GLuint id;
     public:
         Model(Model_*);
-        void render();
+        void render() const;
 };
 
 #endif

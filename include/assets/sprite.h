@@ -21,4 +21,14 @@ class Sprite{
         void draw();
 };
 
+class Sprite3D{
+    Texture* img;
+    Vert_T_2D verts[4];
+    Shader_* shader;
+    VAO vao;
+    public:
+        Sprite3D(const char*, glm::mat4*, Camera*, float*);
+        void draw();
+};
+
 #endif

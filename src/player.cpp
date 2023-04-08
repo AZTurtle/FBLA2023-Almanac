@@ -2,6 +2,12 @@
 
 bool hasLetters = true;
 
+const Texture* borders[3]= {
+	assets.getTexture("letters/border1.png"),
+	assets.getTexture("letters/border2.png"),
+	assets.getTexture("letters/border3.png")
+};
+
 Player::Player(Camera* cam):
 letterShader(new Shader(shaders::diffuse, uniforms(&cam->matrix), staticUniforms())),
 pos_u(glGetUniformLocation(shaders::diffuse.id, "objMatrix"))
@@ -14,7 +20,11 @@ void Player::prepModel(const char* word, glm::ivec3 startPos){
 	this->word = word;
 	wordLen = strlen(word);
 	for(unsigned short i = 0; i < wordLen; i++){
-		body.push_back(new letterTile(startPos,glm::vec3(0.6f, 0.6f, 0.6f),word[i],false,true));
+		if(i > 0){
+			body.push_back(new letterTile(startPos,glm::vec3(66.0f/255.0f, 159.0/255.0f, 246.0f/255.0f),word[i],false,true,2));
+		} else {
+			body.push_back(new letterTile(startPos,glm::vec3(66.0f/255.0f, 159.0/255.0f, 246.0f/255.0f),word[i],false,true,1));
+		}
 		startPos.x -= 1;
 	}
 }
@@ -23,7 +33,7 @@ void Player::move(glm::ivec3 shift){
 	if(hasLetters){
 		update();
 		body[0]->pos += shift;
-		body[0]->transform = glm::translate(glm::mat4(1.0f), glm::vec3(-body[0]->pos.x, body[0]->pos.y, -body[0]->pos.z));
+		body[0]->targetPos = body[0]->pos;
 	}
 	if(body.size() == 0){
 		hasLetters = false;
@@ -37,18 +47,15 @@ void Player::update(){
 }
 
 void Player::clearWords(){
-	int num = 0;
+	std::vector<int> newLetters;
 	for(int i = 0; i < body.size(); i++){
-		if(body[i]->chained){
-			num++;
+		if(!body[i]->chained){
+			newLetters.push_back(i);
+			printf("%i ",i);
 		}
 	}
-	for(int i = 0; i < body.size(); i++){
-		if(body[i]->chained){
-			if(i + num < body.size()){
-				body[i + num]->pos = body[i]->pos;
-			}
-		}
+	for(int i = newLetters.size() - 1; i >= 0; i--){
+		body[newLetters[i]]->pos = body[i]->pos;
 	}
 	for(int i = 0; i < body.size(); i++){
 		if(body[i]->chained){
@@ -58,6 +65,8 @@ void Player::clearWords(){
 	}
 	if(body.size() == 0){
 		hasLetters = false;
+	} else {
+		body[0]->border = (Texture*)borders[1];
 	}
 }
 

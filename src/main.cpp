@@ -7,6 +7,7 @@
 #include"core/input.h"
 #include"core/fs.h"
 
+
 void Window::glLoadGlobalPointers(){
     Assets& assets = Assets::getAssets();
     assets.load();
@@ -31,9 +32,9 @@ int main(){
     mainWindow.load();
 
     mainWindow.openWindow();
+    update_time();
     
     while(Window::windows.size() > 0){
-        update_time();
         getInputInfo();
         for(Window* window : Window::windows){ 
             window->update();

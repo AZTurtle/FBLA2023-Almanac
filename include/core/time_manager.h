@@ -11,5 +11,6 @@ extern float delta_time;
 extern long long globalTime;
 
 void update_time();
+long long getGlobal();
 
 #endif
